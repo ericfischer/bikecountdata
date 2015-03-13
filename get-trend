@@ -1,0 +1,178 @@
+#!/usr/bin/perl
+
+open(IN, "CorteMaderaCreekTrail.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'corte'}{$fields[1]} += $fields[3];
+	$count{'corte'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "MillValleySausalito.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'mill'}{$fields[1]} += $fields[3];
+	$count{'mill'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/arguello.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'arguello'}{$fields[1]} += $fields[2] + $fields[3];
+	$count{'arguello'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/baker.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'baker'}{$fields[1]} += $fields[2];
+	$count{'baker'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/broadwaytunnel.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'broadway'}{$fields[1]} += $fields[2];
+	$count{'broadway'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/clipper.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'clipper'}{$fields[1]} += $fields[2];
+	$count{'clipper'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/golden.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'golden'}{$fields[1]} += $fields[2];
+	$count{'golden'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/kirkham7th.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'kirkham'}{$fields[1]} += $fields[2];
+	$count{'kirkham'}{$fields[1]} += 1;
+
+	$sum{'7th'}{$fields[1]} += $fields[3] + $fields[5];
+	$count{'7th'}{$fields[1]} += 1;
+
+	$sum{'6th'}{$fields[1]} += $fields[3] + $fields[4];
+	$count{'6th'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/lake.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'lake'}{$fields[1]} += $fields[2];
+	$count{'lake'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/markettotem.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'totem'}{$fields[1]} += $fields[2];
+	$count{'totem'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/marketvanness.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'vanness'}{$fields[1]} += $fields[2] + $fields[3];
+	$count{'vanness'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/northpoint.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'northpoint'}{$fields[1]} += $fields[2] + $fields[3];
+	$count{'northpoint'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/panhandle.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'panhandle'}{$fields[1]} += $fields[2];
+	$count{'panhandle'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/polkgrove.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'polk'}{$fields[1]} += $fields[2];
+	$count{'polk'}{$fields[1]} += 1;
+
+	$sum{'grove'}{$fields[1]} += $fields[3];
+	$count{'grove'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/potrero.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'potrero'}{$fields[1]} += $fields[2] + $fields[3];
+	$count{'potrero'}{$fields[1]} += 1;
+}
+close(IN);
+
+open(IN, "sanfrancisco/valencia14th.csv") || die;
+while (<IN>) {
+	chomp;
+	@fields = split(/,/);
+	$sum{'valencia'}{$fields[1]} += $fields[2] + $fields[3];
+	$count{'valencia'}{$fields[1]} += 1;
+
+	$sum{'14th'}{$fields[1]} += $fields[4];
+	$count{'14th'}{$fields[1]} += 1;
+}
+close(IN);
+
+
+
+for $site (sort(keys(%sum))) {
+	for $time (sort(keys(%{$sum{$site}}))) {
+		next unless $time =~ /:/;
+
+		($hour, $minute) = split(/:/, $time);
+		$t = $hour * 60 + $minute;
+		$t2 = $t + 15;
+
+		$when = sprintf("%02d:%02d-%02d:%02d", $t / 60, $t % 60, $t2 / 60, $t2 %60);
+
+		print "bikecountdata/$site,$site,extrapolated bike counter,date,$when,,,,,,,,,,,,,,,,";
+		for ($i = 0; $i < 4; $i++) {
+			# 2, not 4, because these are screenlines, not intersections
+			printf(",%.6f", $sum{$site}{$time} / $count{$site}{$time} / 2);
+		}
+		print "\n";
+	}
+}
